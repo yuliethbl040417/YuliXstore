@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#09050f"><title>YuliXstore.com — Sitio de recargas</title>
 <style>
 :root{--bg:#07040c;--panel:#10091a;--panel2:#170d25;--line:#5f2c7e;--pink:#f15be8;--purple:#a84cff;--text:#fff;--muted:#cbbbd5;--green:#22d66b}
-*{box-sizing:border-box} html,body{margin:0;background:radial-gradient(circle at 50% 5%,#241035 0,#0a0510 42%,#050308 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif} body{min-height:100vh;overflow-x:hidden} button,input{font:inherit} button{cursor:pointer;color:var(--text)} .wrap{max-width:1080px;margin:auto;padding:0 16px 70px}
+*{box-sizing:border-box} html,body{margin:0;background:radial-gradient(circle at 50% 5%,#241035 0,#0a0510 42%,#050308 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif} body{min-height:100vh;overflow-x:hidden} button,input{font:inherit} a,button{-webkit-tap-highlight-color:transparent} button{cursor:pointer;color:var(--text)} .wrap{max-width:1080px;margin:auto;padding:0 16px 70px}
 header{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(185,87,255,.16);position:sticky;top:0;z-index:30;background:rgba(7,4,12,.86);backdrop-filter:blur(16px)} .brand{font-size:29px;font-weight:900;letter-spacing:-1.5px;text-decoration:none;color:white} .brand b{color:#d84cff;text-shadow:0 0 18px #d84cff} .head-actions{display:flex;gap:10px;align-items:center} .top-btn,.dots{border:1px solid #4c1f61;background:#12091b;color:white;border-radius:16px;padding:11px 14px;font-weight:800;box-shadow:0 0 22px rgba(183,70,255,.12)} .top-btn:hover,.dots:hover{border-color:#d34dff;transform:translateY(-1px)} .dots{width:46px;height:46px;padding:0;font-size:24px;line-height:1}
 .hero{margin:24px 0 30px;border:1px solid rgba(214,91,255,.3);border-radius:22px;overflow:hidden;box-shadow:0 0 40px rgba(158,45,255,.16)} .hero img{display:block;width:100%;height:auto}
 h1{font-size:clamp(30px,5vw,50px);margin:0 0 8px;letter-spacing:-1.4px} .sub{font-size:18px;color:var(--muted);line-height:1.45;margin:0 0 20px}
@@ -51,16 +51,16 @@ footer{margin-top:35px;border-top:1px solid #28152f;padding:25px 0;color:#9f90a9
 <div class="overlay" id="historyModal"><div class="modal"><div class="modal-head"><h2>📦 Historial</h2><button class="close" data-close="historyModal">×</button></div><p class="sub">Consulta una compra con su número de pedido.</p><div class="menu-list"><input id="orderLookup" placeholder="Número de pedido"><button class="primary" id="lookupBtn">Consultar pedido</button><div id="lookupResult"></div></div></div></div>
 <script>
 const API='https://yulixtore-backend.onrender.com';
-const fallback=[['110','3.500'],['341','9.500'],['572','15.500'],['1.166','30.000'],['2.398','60.000'],['6.160','145.000']];
+const fallback=[['110','3.500'],['341','10.000'],['572','15.500'],['1.166','30.000'],['2.398','60.000'],['6.160','145.000']];
 let products=[], selected=null, verified=false, method='wompi';
 const $=id=>document.getElementById(id);
-function cop(v){return new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(v)}
+function cop(v){return new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(v)+' COP'}
 function renderPackages(list){
  $('packages').innerHTML=list.map((p,i)=>`<button class="pack" data-index="${i}" aria-label="${p.diamonds.toLocaleString('es-CO')} diamantes por ${cop(p.price_cop)}"><span class="diam"><span class="diamond-icon">💎</span>${p.diamonds.toLocaleString('es-CO')}</span><span class="price">${cop(p.price_cop)}</span></button>`).join('');
  document.querySelectorAll('.pack').forEach((el,i)=>el.addEventListener('click',()=>selectPackage(i)));
 }
 async function loadProducts(){
- try{const r=await fetch(API+'/api/products'); const d=await r.json(); if(Array.isArray(d)&&d.length){products=d.map(x=>({id:x.id,diamonds:Number(x.diamonds),price_cop:Number(x.price_cop),name:x.name||''}));renderPackages(products);return}}catch(e){}
+ try{const r=await fetch(API+'/api/products'); const d=await r.json(); if(Array.isArray(d)&&d.length){products=d.map(x=>({id:x.id,diamonds:Number(x.diamonds),price_cop:Number(x.diamonds)===341?10000:Number(x.price),name:x.name||''}));renderPackages(products);return}}catch(e){}
  products=fallback.map((x,i)=>({id:null,diamonds:Number(x[0].replace('.','')),price_cop:Number(x[1].replace('.','')),name:''}));renderPackages(products);
 }
 function selectPackage(i){selected=products[i];document.querySelectorAll('.pack').forEach((x,n)=>x.classList.toggle('selected',n===i));if(verified){$('payment').classList.add('show');updatePay()} else {toast('Verifica tu ID para continuar con la compra.')}}
